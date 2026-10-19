@@ -355,9 +355,83 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+/* ===== 密码门样式 ===== */
+        #lock-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #FFF0F3 0%, #FFE4E1 50%, #FFF5E1 100%);
+            padding: 20px;
+        }
+        .lock-box {
+            background: white;
+            width: 100%;
+            max-width: 340px;
+            border-radius: 24px;
+            padding: 36px 28px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(255,107,129,0.18);
+            animation: fadeIn 0.5s ease;
+        }
+        .lock-emoji { font-size: 56px; margin-bottom: 14px; }
+        .lock-title {
+            font-size: 22px;
+            color: #FF6B81;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .lock-tip {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .lock-input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 18px;
+            letter-spacing: 3px;
+            text-align: center;
+            border: 2px solid #FFD6DE;
+            border-radius: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+        .lock-input:focus { border-color: #FF6B81; }
+        .lock-input.error {
+            border-color: #ff4d6d;
+            animation: shake 0.4s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .lock-msg {
+            font-size: 13px;
+            color: #ff4d6d;
+            min-height: 18px;
+            margin-bottom: 6px;
+        }
     </style>
 </head>
 <body>
+<!-- ===== 密码门 ===== -->
+    <div id="lock-screen">
+        <div class="lock-box">
+            <div class="lock-emoji">🔒</div>
+            <div class="lock-title">请输入访问密码</div>
+            <div class="lock-tip">这是一个私密测试页面<br>需要密码才能进入哦</div>
+            <input class="lock-input" id="lockInput" type="password" placeholder="请输入密码" maxlength="20" autocomplete="off">
+            <div class="lock-msg" id="lockMsg"></div>
+            <button class="btn" id="lockBtn" style="width:100%;">进入</button>
+        </div>
+    </div>
     <div id="app">
         <!-- 封面页 -->
         <div id="cover" class="page active">
@@ -417,6 +491,33 @@
     </div>
 
     <script>
+// ===== 密码门逻辑 =====
+        // ★ 更换密码只需改这一行 ★
+        const ACCESS_PASSWORD = "Kp7s9QmZ";
+
+        function unlock() {
+            const input = document.getElementById('lockInput');
+            const msg = document.getElementById('lockMsg');
+            if (input.value === ACCESS_PASSWORD) {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+            } else {
+                msg.textContent = '密码错误，请重试';
+                input.classList.add('error');
+                input.value = '';
+                input.focus();
+                setTimeout(() => input.classList.remove('error'), 400);
+            }
+        }
+
+        document.getElementById('lockBtn').addEventListener('click', unlock);
+        document.getElementById('lockInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') unlock();
+        });
+
+        // 默认隐藏主内容，校验通过后才显示
+        document.getElementById('app').style.display = 'none';
+
         // 题目数据
         const questions = [
             { text: "周五晚上6点半，你终于下班/下课，你的第一反应是？", options: ["只想立刻回家躺平，享受独处时光", "迫不及待约朋友吃顿好的，分享一周趣事", "去健身房或夜跑，用汗水洗刷疲惫", "打开电脑，开始执行周末自我提升计划"] },
